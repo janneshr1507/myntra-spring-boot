@@ -26,7 +26,6 @@ public class ItemService {
 
     public ItemDTO createItem(SaveItemDTO requestDTO) {
         Item item = modelMapper.map(requestDTO, Item.class);
-        item.setItemId(UUID.randomUUID());
         return modelMapper.map(itemRepo.save(item), ItemDTO.class);
     }
 }

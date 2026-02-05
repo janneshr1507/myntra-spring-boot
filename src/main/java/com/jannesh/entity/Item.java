@@ -1,5 +1,6 @@
 package com.jannesh.entity;
 
+import com.jannesh.util.enums.ItemStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +49,10 @@ public class Item {
 
     private Long totalNumberOfRatings;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ItemStatus itemStatus;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -57,6 +62,7 @@ public class Item {
     @PrePersist
     public void onCreate() {
         this.itemId = UUID.randomUUID();
+        this.itemStatus = ItemStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

@@ -1,14 +1,14 @@
 package com.jannesh.controller;
 
-import com.jannesh.dto.ItemDTO;
+import com.jannesh.dto.item.ItemDTO;
+import com.jannesh.dto.item.SaveItemDTO;
 import com.jannesh.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,8 +17,14 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<?> getItemById(@PathVariable("itemId") Long itemId) {
+    public ResponseEntity<?> getItemById(@PathVariable("itemId") UUID itemId) {
         ItemDTO itemDTO = itemService.fetchItemDetailsByItemId(itemId);
+        return new ResponseEntity<>(itemDTO, HttpStatus.OK);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> saveItem(@RequestBody SaveItemDTO requestDTO) {
+        ItemDTO itemDTO = itemService.createItem(requestDTO);
         return new ResponseEntity<>(itemDTO, HttpStatus.OK);
     }
 

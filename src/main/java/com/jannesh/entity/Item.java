@@ -6,13 +6,15 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "items")
 @Getter @Setter
 public class Item {
     @Id
-    private Long itemId;
+    @Column(nullable = false, updatable = false)
+    private UUID itemId;
 
     @Column(nullable = false)
     private String brand;
@@ -43,6 +45,7 @@ public class Item {
 
     @PrePersist
     public void onCreate() {
+        this.itemId = UUID.randomUUID();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

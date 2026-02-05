@@ -23,9 +23,6 @@ public class Item {
     private String model;
 
     @Column(nullable = false)
-    private BigDecimal price;
-
-    @Column(nullable = false)
     private String color;
 
     @Column(nullable = false, name = "item_size")
@@ -36,6 +33,20 @@ public class Item {
 
     @Column(nullable = false)
     private String material;
+
+    @Column(nullable = false)
+    private BigDecimal actualPrice;
+
+    @Column(precision = 3, scale = 2)
+    private BigDecimal discount;
+
+    @Column(nullable = false)
+    private BigDecimal sellingPrice;
+
+    @Column(precision = 2, scale = 1)
+    private BigDecimal averageRatings;
+
+    private Long totalNumberOfRatings;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

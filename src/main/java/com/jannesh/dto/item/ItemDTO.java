@@ -18,4 +18,9 @@ public class ItemDTO {
     private String size;
     private String fit;
     private String material;
+    private BigDecimal actualPrice;
+    private BigDecimal discount;
+    private BigDecimal sellingPrice;
+    private BigDecimal averageRatings;
+    private Long totalNumberOfRatings;
 }

@@ -24,7 +24,7 @@ public class ItemController {
 
     @PostMapping("/save")
     public ResponseEntity<?> saveItem(@RequestBody SaveItemDTO requestDTO) {
-        ItemDTO itemDTO = itemService.createItem(requestDTO);
+        ItemDTO itemDTO = itemService.createItemDTO(requestDTO);
         return new ResponseEntity<>(itemDTO, HttpStatus.OK);
     }
 

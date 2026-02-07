@@ -18,6 +18,14 @@ public class Item {
     @Column(nullable = false, updatable = false)
     private UUID itemId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id", nullable = false)
+    private Vendor vendor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
+
     @Column(nullable = false)
     private String brand;
 

@@ -10,9 +10,11 @@ import java.util.UUID;
 
 @Getter @Setter
 @ToString
-@JsonPropertyOrder({"itemId","brand","model","price","color","size","fit","material","actualPrice","discount","sellingPrice","averageRatings","totalNumberOfRatings"})
+@JsonPropertyOrder({"itemId","vendorId","warehouseId","brand","model","price","color","size","fit","material","actualPrice","discount","sellingPrice","averageRatings","totalNumberOfRatings"})
 public class ItemDTO {
     private UUID itemId;
+    private UUID vendorId;
+    private UUID warehouseId;
     private String brand;
     private String model;
     private String color;

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -35,13 +36,13 @@ public class Item {
     @Column(nullable = false)
     private String material;
 
-    @Column(nullable = false)
+    @Column(precision = 8, scale = 2, nullable = false)
     private BigDecimal actualPrice;
 
     @Column(precision = 3, scale = 2)
     private BigDecimal discount;
 
-    @Column(nullable = false)
+    @Column(precision = 8, scale = 2, nullable = false)
     private BigDecimal sellingPrice;
 
     @Column(precision = 2, scale = 1)
@@ -63,6 +64,9 @@ public class Item {
     public void onCreate() {
         this.itemId = UUID.randomUUID();
         this.itemStatus = ItemStatus.ACTIVE;
+        this.sellingPrice = this.actualPrice.subtract(this.actualPrice.multiply(this.discount)).setScale(2, RoundingMode.HALF_UP);
+        this.averageRatings = BigDecimal.valueOf(0.0);
+        this.totalNumberOfRatings = 0L;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

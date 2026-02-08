@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,5 +58,18 @@ public class WarehouseService {
         Warehouse warehouse = fetchWarehouseByWarehouseId(warehouseId);
         warehouse.setStatus(status);
         return modelMapper.map(warehouseRepo.save(warehouse), WarehouseDTO.class);
+    }
+
+    public List<WarehouseDTO> fetchWarehouseListByVendorId(UUID vendorId) {
+        List<Warehouse> warehouseList = warehouseRepo.findByVendor_VendorId(vendorId);
+        if(warehouseList.isEmpty()) throw new RuntimeException("No warehouse available for the vendorId");
+
+        List<WarehouseDTO> warehouseDTOList = new ArrayList<>();
+        for(Warehouse warehouse: warehouseList) {
+            WarehouseDTO warehouseDTO = modelMapper.map(warehouse, WarehouseDTO.class);
+            warehouseDTOList.add(warehouseDTO);
+        }
+
+        return warehouseDTOList;
     }
 }

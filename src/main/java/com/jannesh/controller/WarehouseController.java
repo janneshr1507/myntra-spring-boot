@@ -21,6 +21,11 @@ public class WarehouseController {
         return new ResponseEntity<>(warehouseService.fetchWarehouseDTOByWarehouseId(warehouseId), HttpStatus.OK);
     }
 
+    @GetMapping("/getByVendorId/{vendorId}")
+    public ResponseEntity<?> getWarehouseListByVendorId(@PathVariable UUID vendorId) {
+        return new ResponseEntity<>(warehouseService.fetchWarehouseListByVendorId(vendorId), HttpStatus.OK);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> saveWarehouse(@RequestBody SaveWarehouseDTO requestDTO) {
         return new ResponseEntity<>(warehouseService.createWarehouseDTO(requestDTO), HttpStatus.OK);

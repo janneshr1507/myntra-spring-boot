@@ -5,7 +5,6 @@ import com.jannesh.dto.item.SaveItemDTO;
 import com.jannesh.entity.Item;
 import com.jannesh.entity.Vendor;
 import com.jannesh.entity.Warehouse;
-import com.jannesh.exception.ItemNotFoundException;
 import com.jannesh.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -41,15 +40,7 @@ public class ItemService {
     }
 
     public Item createItem(SaveItemDTO requestDTO) {
-        Item item = new Item();
-        item.setBrand(requestDTO.getBrand());
-        item.setModel(requestDTO.getModel());
-        item.setColor(requestDTO.getColor());
-        item.setSize(requestDTO.getSize());
-        item.setFit(requestDTO.getFit());
-        item.setMaterial(requestDTO.getMaterial());
-        item.setActualPrice(requestDTO.getActualPrice());
-        item.setDiscount(requestDTO.getDiscount());
+        Item item = mapToItem(requestDTO);
 
         Vendor vendor = vendorService.fetchVendorByVendorId(requestDTO.getVendorId());
         Warehouse warehouse = warehouseService.fetchWarehouseByWarehouseId(requestDTO.getWarehouseId(), requestDTO.getVendorId());
@@ -58,5 +49,18 @@ public class ItemService {
         item.setWarehouse(warehouse);
 
         return itemRepo.save(item);
+    }
+
+    public Item mapToItem(SaveItemDTO itemDTO) {
+        Item item = new Item();
+        item.setBrand(itemDTO.getBrand());
+        item.setModel(itemDTO.getModel());
+        item.setColor(itemDTO.getColor());
+        item.setSize(itemDTO.getSize());
+        item.setFit(itemDTO.getFit());
+        item.setMaterial(itemDTO.getMaterial());
+        item.setActualPrice(itemDTO.getActualPrice());
+        item.setDiscount(itemDTO.getDiscount());
+        return item;
     }
 }

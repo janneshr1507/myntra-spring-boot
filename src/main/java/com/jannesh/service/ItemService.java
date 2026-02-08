@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,7 +42,7 @@ public class ItemService {
         Item item = mapToItem(requestDTO);
 
         Vendor vendor = vendorService.fetchVendorByVendorId(requestDTO.getVendorId());
-        Warehouse warehouse = warehouseService.fetchWarehouseByWarehouseId(requestDTO.getWarehouseId(), requestDTO.getVendorId());
+        Warehouse warehouse = warehouseService.fetchWarehouseByWarehouseIdAndVendorId(requestDTO.getWarehouseId(), requestDTO.getVendorId());
 
         item.setVendor(vendor);
         item.setWarehouse(warehouse);

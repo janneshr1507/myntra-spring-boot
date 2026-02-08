@@ -4,6 +4,7 @@ import com.jannesh.dto.warehouse.SaveWarehouseDTO;
 import com.jannesh.dto.warehouse.WarehouseDTO;
 import com.jannesh.entity.Warehouse;
 import com.jannesh.repository.WarehouseRepository;
+import com.jannesh.util.enums.WarehouseStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -17,12 +18,17 @@ public class WarehouseService {
     private final WarehouseRepository warehouseRepo;
     private final ModelMapper modelMapper;
 
-    public Warehouse fetchWarehouseByWarehouseId(UUID warehouseId, UUID vendorId) {
+    public Warehouse fetchWarehouseByWarehouseIdAndVendorId(UUID warehouseId, UUID vendorId) {
         if(existsByVendorId(vendorId)) {
             return warehouseRepo.findById(warehouseId)
                     .orElseThrow(() -> new EntityNotFoundException("Warehouse Not Found"));
         }
         throw new RuntimeException("Warehouse is not linked to the vendor");
+    }
+
+    public Warehouse fetchWarehouseByWarehouseIdAndVendorId(UUID warehouseId) {
+        return warehouseRepo.findById(warehouseId)
+                .orElseThrow(() -> new EntityNotFoundException("Warehouse Not Found"));
     }
 
     public boolean existsByVendorId(UUID vendorId) {
@@ -39,5 +45,11 @@ public class WarehouseService {
 
     public Warehouse createWarehouse(Warehouse warehouse) {
         return warehouseRepo.save(warehouse);
+    }
+
+    public WarehouseDTO modifyWarehouseStatus(UUID warehouseId, WarehouseStatus status) {
+        Warehouse warehouse = fetchWarehouseByWarehouseIdAndVendorId(warehouseId);
+        warehouse.setStatus(status);
+        return modelMapper.map(warehouseRepo.save(warehouse), WarehouseDTO.class);
     }
 }

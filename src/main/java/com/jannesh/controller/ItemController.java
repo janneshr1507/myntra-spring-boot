@@ -18,7 +18,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ResponseEntity<?> getItemById(@PathVariable("itemId") UUID itemId) {
-        ItemDTO itemDTO = itemService.fetchItemDetailsByItemId(itemId);
+        ItemDTO itemDTO = itemService.fetchItemDTOByItemId(itemId);
         return new ResponseEntity<>(itemDTO, HttpStatus.OK);
     }
 

@@ -16,6 +16,11 @@ import java.util.UUID;
 public class WarehouseController {
     private final WarehouseService warehouseService;
 
+    @GetMapping("/getByWarehouseId/{warehouseId}")
+    public ResponseEntity<?> getWarehouseByWarehouseId(@PathVariable UUID warehouseId) {
+        return new ResponseEntity<>(warehouseService.fetchWarehouseDTOByWarehouseId(warehouseId), HttpStatus.OK);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> saveWarehouse(@RequestBody SaveWarehouseDTO requestDTO) {
         return new ResponseEntity<>(warehouseService.createWarehouseDTO(requestDTO), HttpStatus.OK);

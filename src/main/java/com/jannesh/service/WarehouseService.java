@@ -26,9 +26,14 @@ public class WarehouseService {
         throw new RuntimeException("Warehouse is not linked to the vendor");
     }
 
-    public Warehouse fetchWarehouseByWarehouseIdAndVendorId(UUID warehouseId) {
+    public Warehouse fetchWarehouseByWarehouseId(UUID warehouseId) {
         return warehouseRepo.findById(warehouseId)
                 .orElseThrow(() -> new EntityNotFoundException("Warehouse Not Found"));
+    }
+
+    public WarehouseDTO fetchWarehouseDTOByWarehouseId(UUID warehouseId){
+        Warehouse warehouse = fetchWarehouseByWarehouseId(warehouseId);
+        return modelMapper.map(warehouse, WarehouseDTO.class);
     }
 
     public boolean existsByVendorId(UUID vendorId) {
@@ -48,7 +53,7 @@ public class WarehouseService {
     }
 
     public WarehouseDTO modifyWarehouseStatus(UUID warehouseId, WarehouseStatus status) {
-        Warehouse warehouse = fetchWarehouseByWarehouseIdAndVendorId(warehouseId);
+        Warehouse warehouse = fetchWarehouseByWarehouseId(warehouseId);
         warehouse.setStatus(status);
         return modelMapper.map(warehouseRepo.save(warehouse), WarehouseDTO.class);
     }

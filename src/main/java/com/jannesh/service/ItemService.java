@@ -21,16 +21,12 @@ public class ItemService {
     private final WarehouseService warehouseService;
     private final ModelMapper modelMapper;
 
-    public ItemDTO fetchItemDetailsByItemId(UUID itemId) {
+    public ItemDTO fetchItemDTOByItemId(UUID itemId) {
         return modelMapper.map(fetchItemByItemId(itemId), ItemDTO.class);
     }
 
     public ItemDTO createItemDTO(SaveItemDTO requestDTO) {
         return modelMapper.map(createItem(requestDTO), ItemDTO.class);
-    }
-
-    public boolean existsByItemId(UUID itemId) {
-        return itemRepo.existsById(itemId);
     }
 
     public Item fetchItemByItemId(UUID itemId) {

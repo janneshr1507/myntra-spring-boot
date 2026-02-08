@@ -30,6 +30,9 @@ public class WarehouseService {
     }
 
     public WarehouseDTO createWarehouseDTO(SaveWarehouseDTO requestDTO) {
+        if(warehouseRepo.existsByVendor_VendorIdAndPincode(requestDTO.getVendorId(), requestDTO.getPincode()))
+            throw new RuntimeException("Warehouse already exists on that pincode");
+
         Warehouse warehouse = modelMapper.map(requestDTO, Warehouse.class);
         return modelMapper.map(createWarehouse(warehouse), WarehouseDTO.class);
     }

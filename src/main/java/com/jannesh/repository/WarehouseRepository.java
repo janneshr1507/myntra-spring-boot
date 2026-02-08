@@ -8,5 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
+    boolean existsByVendor_VendorIdAndPincode(UUID vendorId, String pincode);
     boolean existsByVendor_VendorId(UUID vendorId);
 }

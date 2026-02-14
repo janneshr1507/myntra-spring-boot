@@ -5,9 +5,12 @@ import com.jannesh.dto.inventory.SaveInventoryDTO;
 import com.jannesh.entity.Inventory;
 import com.jannesh.entity.Item;
 import com.jannesh.repository.InventoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,11 @@ public class InventoryService {
 
     public Inventory createInventory(Inventory inventory) {
         return inventoryRepo.save(inventory);
+    }
+
+    public Inventory fetchInventoryByItemId(UUID itemId) {
+        return inventoryRepo.findByItem_ItemId(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Inventory Not Found"));
     }
 
 }

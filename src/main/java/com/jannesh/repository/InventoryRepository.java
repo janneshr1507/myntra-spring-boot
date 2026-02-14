@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
     boolean existsByItem_ItemId(UUID itemId);
+    Optional<Inventory> findByItem_ItemId(UUID itemId);
 }

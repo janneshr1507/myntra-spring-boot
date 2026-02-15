@@ -31,4 +31,9 @@ public class CartController {
         return new ResponseEntity<>(cartService.fetchCartList(), HttpStatus.OK);
     }
 
+    @GetMapping("/getByCartId/{cartId}")
+    public ResponseEntity<?> getCartDTOByCartId(@PathVariable("cartId") UUID cartId) {
+        return new ResponseEntity<>(cartService.fetchCartDTOByCartId(cartId), HttpStatus.OK);
+    }
+
 }

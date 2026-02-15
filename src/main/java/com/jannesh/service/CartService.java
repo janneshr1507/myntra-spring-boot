@@ -95,4 +95,35 @@ public class CartService {
 
         return cartDTOList;
     }
+
+    public List<CartItem> fetchCartItemListByCartId(UUID cartId) {
+        return cartItemRepo.findByCart_CartId(cartId);
+    }
+
+    public List<CartItemDTO> fetchCartItemDTOListByCartId(UUID cartId) {
+        List<CartItem> cartItemList = fetchCartItemListByCartId(cartId);
+
+        List<CartItemDTO> cartItemDTOList = new ArrayList<>();
+        for(CartItem cartItem: cartItemList) {
+            CartItemDTO cartItemDTO = cartItemMapper.toDTO(cartItem);
+            cartItemDTOList.add(cartItemDTO);
+        }
+
+        return cartItemDTOList;
+    }
+
+    public Cart fetchCartByCartId(UUID cartId) {
+        return cartRepo.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart Not Found"));
+    }
+
+    public CartDTO fetchCartDTOByCartId(UUID cartId) {
+        Cart cart = fetchCartByCartId(cartId);
+        CartDTO cartDTO = cartMapper.toDTO(cart);
+
+        List<CartItemDTO> cartItemDTOList = fetchCartItemDTOListByCartId(cartId);
+        cartDTO.setCartItemList(cartItemDTOList);
+
+        return cartDTO;
+    }
 }

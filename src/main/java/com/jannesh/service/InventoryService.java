@@ -28,7 +28,7 @@ public class InventoryService {
         inventory.setItem(item);
         inventory.setAvailableQty((inventory.getAvailableQty() == null ? 0L : inventory.getAvailableQty()) + requestDTO.getAvailableQty());
 
-        return mapper.toDTO(inventoryRepo.save(inventory));
+        return mapper.toDTO(createInventory(inventory));
     }
 
     public Inventory createInventory(Inventory inventory) {

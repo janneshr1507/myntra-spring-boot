@@ -4,6 +4,7 @@ import com.jannesh.dto.vendor.SaveVendorDTO;
 import com.jannesh.dto.vendor.VendorDTO;
 import com.jannesh.entity.Vendor;
 import com.jannesh.repository.VendorRepository;
+import com.jannesh.util.mapper.VendorMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VendorService {
     private final VendorRepository vendorRepo;
-    private final ModelMapper modelMapper;
+    private final VendorMapper mapper;
 
     public Vendor fetchVendorByVendorId(UUID inventoryId) {
         return vendorRepo.findById(inventoryId)
@@ -23,8 +24,8 @@ public class VendorService {
     }
 
     public VendorDTO createVendorDTO(SaveVendorDTO requestDTO) {
-        Vendor vendor = modelMapper.map(requestDTO, Vendor.class);
-        return modelMapper.map(createVendor(vendor), VendorDTO.class);
+        Vendor vendor = mapper.toEntity(requestDTO);
+        return mapper.toDTO(createVendor(vendor));
     }
 
     public Vendor createVendor(Vendor vendor) {

@@ -6,6 +6,7 @@ import com.jannesh.entity.Item;
 import com.jannesh.entity.Vendor;
 import com.jannesh.entity.Warehouse;
 import com.jannesh.repository.ItemRepository;
+import com.jannesh.util.mapper.ItemMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -19,14 +20,14 @@ public class ItemService {
     private final ItemRepository itemRepo;
     private final VendorService vendorService;
     private final WarehouseService warehouseService;
-    private final ModelMapper modelMapper;
+    private final ItemMapper mapper;
 
     public ItemDTO fetchItemDTOByItemId(UUID itemId) {
-        return modelMapper.map(fetchItemByItemId(itemId), ItemDTO.class);
+        return mapper.toDTO(fetchItemByItemId(itemId));
     }
 
     public ItemDTO createItemDTO(SaveItemDTO requestDTO) {
-        return modelMapper.map(createItem(requestDTO), ItemDTO.class);
+        return mapper.toDTO(createItem(requestDTO));
     }
 
     public Item fetchItemByItemId(UUID itemId) {
@@ -35,7 +36,7 @@ public class ItemService {
     }
 
     public Item createItem(SaveItemDTO requestDTO) {
-        Item item = mapToItem(requestDTO);
+        Item item = mapper.toEntity(requestDTO);
 
         Vendor vendor = vendorService.fetchVendorByVendorId(requestDTO.getVendorId());
         Warehouse warehouse = warehouseService.fetchWarehouseByWarehouseIdAndVendorId(requestDTO.getWarehouseId(), requestDTO.getVendorId());
@@ -44,18 +45,5 @@ public class ItemService {
         item.setWarehouse(warehouse);
 
         return itemRepo.save(item);
-    }
-
-    public Item mapToItem(SaveItemDTO itemDTO) {
-        Item item = new Item();
-        item.setBrand(itemDTO.getBrand());
-        item.setModel(itemDTO.getModel());
-        item.setColor(itemDTO.getColor());
-        item.setSize(itemDTO.getSize());
-        item.setFit(itemDTO.getFit());
-        item.setMaterial(itemDTO.getMaterial());
-        item.setActualPrice(itemDTO.getActualPrice());
-        item.setDiscount(itemDTO.getDiscount());
-        return item;
     }
 }

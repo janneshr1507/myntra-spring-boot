@@ -8,7 +8,6 @@ import com.jannesh.repository.InventoryRepository;
 import com.jannesh.util.mapper.InventoryMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -40,4 +39,7 @@ public class InventoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Inventory Not Found"));
     }
 
+    public InventoryDTO fetchInventoryDTOByItemId(UUID itemId) {
+        return mapper.toDTO(fetchInventoryByItemId(itemId));
+    }
 }

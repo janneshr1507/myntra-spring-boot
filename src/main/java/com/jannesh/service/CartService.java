@@ -1,16 +1,20 @@
 package com.jannesh.service;
 
 import com.jannesh.dto.cart.AddItemDTO;
+import com.jannesh.dto.cart.CartDTO;
 import com.jannesh.dto.cartItem.CartItemDTO;
 import com.jannesh.entity.*;
 import com.jannesh.repository.CartItemRepository;
 import com.jannesh.repository.CartRepository;
 import com.jannesh.util.enums.CartStatus;
 import com.jannesh.util.mapper.CartItemMapper;
+import com.jannesh.util.mapper.CartMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,6 +26,7 @@ public class CartService {
     private final InventoryService inventoryService;
     private final CustomerService customerService;
     private final CartItemMapper cartItemMapper;
+    private final CartMapper cartMapper;
 
     public Cart createCart(UUID customerId) {
         boolean status = cartRepo.existsByCustomer_CustomerIdAndStatus(customerId, CartStatus.OPEN);
@@ -77,5 +82,17 @@ public class CartService {
         inventoryService.createInventory(inventory);
 
         cartItemRepo.delete(cartItem);
+    }
+
+    public List<CartDTO> fetchCartList() {
+        List<Cart> cartList = cartRepo.findAll();
+
+        List<CartDTO> cartDTOList = new ArrayList<>();
+        for(Cart cart: cartList) {
+            CartDTO cartDTO = cartMapper.toDTO(cart);
+            cartDTOList.add(cartDTO);
+        }
+
+        return cartDTOList;
     }
 }

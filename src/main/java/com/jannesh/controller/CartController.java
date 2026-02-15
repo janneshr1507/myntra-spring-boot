@@ -25,4 +25,10 @@ public class CartController {
         cartService.removeCartItem(cartId, itemId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<?> getCartList() {
+        return new ResponseEntity<>(cartService.fetchCartList(), HttpStatus.OK);
+    }
+
 }

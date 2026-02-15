@@ -33,6 +33,5 @@ public class VendorService {
         } catch (DataIntegrityViolationException ex) {
             throw new RuntimeException("Vendor with that name already exists");
         }
-
     }
 }

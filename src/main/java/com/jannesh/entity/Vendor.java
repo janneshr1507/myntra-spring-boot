@@ -12,6 +12,8 @@ import java.util.UUID;
 public class Vendor {
     @Id
     private UUID vendorId;
+
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false, updatable = false)

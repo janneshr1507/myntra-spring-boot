@@ -7,6 +7,7 @@ import com.jannesh.repository.VendorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -27,6 +28,11 @@ public class VendorService {
     }
 
     public Vendor createVendor(Vendor vendor) {
-        return vendorRepo.save(vendor);
+        try {
+            return vendorRepo.save(vendor);
+        } catch (DataIntegrityViolationException ex) {
+            throw new RuntimeException("Vendor with that name already exists");
+        }
+
     }
 }

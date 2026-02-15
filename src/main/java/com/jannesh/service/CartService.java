@@ -6,12 +6,11 @@ import com.jannesh.entity.*;
 import com.jannesh.repository.CartItemRepository;
 import com.jannesh.repository.CartRepository;
 import com.jannesh.util.enums.CartStatus;
+import com.jannesh.util.mapper.CartItemMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,7 +21,7 @@ public class CartService {
     private final ItemService itemService;
     private final InventoryService inventoryService;
     private final CustomerService customerService;
-    private final ModelMapper modelMapper;
+    private final CartItemMapper cartItemMapper;
 
     public Cart createCart(UUID customerId) {
         boolean status = cartRepo.existsByCustomer_CustomerIdAndStatus(customerId, CartStatus.OPEN);
@@ -49,28 +48,34 @@ public class CartService {
             throw new RuntimeException("Stock Not Available");
         }
 
+        Cart cart = fetchCartByCustomerId(addItemDTO.getCustomerId());
+        CartItem cartItem = cartItemRepo.findByCart_CartIdAndItem_ItemId(cart.getCartId(), item.getItemId())
+                .orElse(new CartItem());
+
+        if(cartItem.getCartItemId() == null) {
+            cartItem.setCart(cart);
+            cartItem.setItem(item);
+        }
+
         inventory.setAvailableQty(inventory.getAvailableQty() - addItemDTO.getQuantity());
         inventory.setReservedQty(inventory.getReservedQty() + addItemDTO.getQuantity());
         inventoryService.createInventory(inventory);
 
-        Cart cart = fetchCartByCustomerId(addItemDTO.getCustomerId());
+        cartItem.setQuantity((cartItem.getQuantity() == null ? 0L : cartItem.getQuantity()) + addItemDTO.getQuantity());
+        cartItem.setAmount(item.getSellingPrice());
 
-        CartItem cartItem = null;
-        Optional<CartItem> optionalCartItem = cartItemRepo.findByCart_CartId(cart.getCartId());
-        if(optionalCartItem.isPresent()) {
-            cartItem = optionalCartItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + addItemDTO.getQuantity());
-        } else {
-            cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setItem(item);
-            cartItem.setQuantity(addItemDTO.getQuantity());
-            cartItem.setAmount(item.getSellingPrice());
-        }
+        return cartItemMapper.toDTO(cartItemRepo.save(cartItem));
+    }
 
-        CartItemDTO savedCartItemDTO = modelMapper.map(cartItemRepo.save(cartItem), CartItemDTO.class);
-        savedCartItemDTO.setCartId(cart.getCartId());
-        savedCartItemDTO.setItemId(item.getItemId());
-        return savedCartItemDTO;
+    public void removeCartItem(UUID cartId, UUID itemId) {
+        CartItem cartItem = cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart Item not found"));
+
+        Inventory inventory = inventoryService.fetchInventoryByItemId(itemId);
+        inventory.setAvailableQty(inventory.getAvailableQty() + cartItem.getQuantity());
+        inventory.setReservedQty(inventory.getReservedQty() - cartItem.getQuantity());
+        inventoryService.createInventory(inventory);
+
+        cartItemRepo.delete(cartItem);
     }
 }

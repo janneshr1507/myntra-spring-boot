@@ -5,6 +5,7 @@ import com.jannesh.dto.inventory.SaveInventoryDTO;
 import com.jannesh.entity.Inventory;
 import com.jannesh.entity.Item;
 import com.jannesh.repository.InventoryRepository;
+import com.jannesh.util.mapper.InventoryMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -17,20 +18,17 @@ import java.util.UUID;
 public class InventoryService {
     private final InventoryRepository inventoryRepo;
     private final ItemService itemService;
-    private final ModelMapper modelMapper;
+    private final InventoryMapper mapper;
 
     public InventoryDTO createInventoryDTO(SaveInventoryDTO requestDTO) {
-
-        if(inventoryRepo.existsByItem_ItemId(requestDTO.getItemId()))
-            throw new RuntimeException(("Item already exists in the Inventory"));
-
         Item item = itemService.fetchItemByItemId(requestDTO.getItemId());
-        Inventory inventory = modelMapper.map(requestDTO, Inventory.class);
+        Inventory inventory = inventoryRepo.findByItem_ItemId(requestDTO.getItemId())
+                .orElse(new Inventory());
 
         inventory.setItem(item);
-        inventory.setAvailableQty(requestDTO.getAvailableQty());
+        inventory.setAvailableQty((inventory.getAvailableQty() == null ? 0L : inventory.getAvailableQty()) + requestDTO.getAvailableQty());
 
-        return modelMapper.map(createInventory(inventory), InventoryDTO.class);
+        return mapper.toDTO(inventoryRepo.save(inventory));
     }
 
     public Inventory createInventory(Inventory inventory) {

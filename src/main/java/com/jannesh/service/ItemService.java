@@ -9,7 +9,6 @@ import com.jannesh.repository.ItemRepository;
 import com.jannesh.util.mapper.ItemMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -27,23 +26,18 @@ public class ItemService {
     }
 
     public ItemDTO createItemDTO(SaveItemDTO requestDTO) {
-        return mapper.toDTO(createItem(requestDTO));
+        Vendor vendor = vendorService.fetchVendorByVendorId(requestDTO.getVendorId());
+        Warehouse warehouse = warehouseService.fetchWarehouseByWarehouseIdAndVendorId(requestDTO.getWarehouseId(), requestDTO.getVendorId());
+
+        Item item = mapper.toEntity(requestDTO);
+        item.setVendor(vendor);
+        item.setWarehouse(warehouse);
+
+        return mapper.toDTO(itemRepo.save(item));
     }
 
     public Item fetchItemByItemId(UUID itemId) {
         return itemRepo.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
-    }
-
-    public Item createItem(SaveItemDTO requestDTO) {
-        Item item = mapper.toEntity(requestDTO);
-
-        Vendor vendor = vendorService.fetchVendorByVendorId(requestDTO.getVendorId());
-        Warehouse warehouse = warehouseService.fetchWarehouseByWarehouseIdAndVendorId(requestDTO.getWarehouseId(), requestDTO.getVendorId());
-
-        item.setVendor(vendor);
-        item.setWarehouse(warehouse);
-
-        return itemRepo.save(item);
     }
 }

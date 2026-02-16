@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +90,8 @@ public class CartService {
 
         List<CartDTO> cartDTOList = new ArrayList<>();
         for(Cart cart: cartList) {
-            CartDTO cartDTO = cartMapper.toDTO(cart);
+            CartDTO cartDTO = cartMapper.toDTO(calculateCartAmount(cart));
+            cartDTO.setCartItemList(fetchCartItemDTOListByCartId(cart.getCartId()));
             cartDTOList.add(cartDTO);
         }
 
@@ -113,8 +115,9 @@ public class CartService {
     }
 
     public Cart fetchCartByCartId(UUID cartId) {
-        return cartRepo.findById(cartId)
+        Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart Not Found"));
+        return calculateCartAmount(cart);
     }
 
     public CartDTO fetchCartDTOByCartId(UUID cartId) {
@@ -125,5 +128,29 @@ public class CartService {
         cartDTO.setCartItemList(cartItemDTOList);
 
         return cartDTO;
+    }
+
+    public Cart calculateCartAmount(Cart cart) {
+
+        cart.setTotalDiscount(BigDecimal.ZERO);
+        cart.setTotalMRP(BigDecimal.ZERO);
+        cart.setTotalAmount(BigDecimal.ZERO);
+
+        List<CartItem> cartItemList = fetchCartItemListByCartId(cart.getCartId());
+        for(CartItem cartItem: cartItemList) {
+            Item item = cartItem.getItem();
+            BigDecimal quantity = BigDecimal.valueOf(cartItem.getQuantity());
+
+            BigDecimal itemMRP = item.getActualPrice().multiply(quantity);
+            BigDecimal itemDiscount = item.getActualPrice()
+                            .multiply(item.getDiscount())
+                            .multiply(quantity);
+            BigDecimal itemSelling = item.getSellingPrice().multiply(quantity);
+
+            cart.setTotalMRP(cart.getTotalMRP().add(itemMRP));
+            cart.setTotalDiscount(cart.getTotalDiscount().add(itemDiscount));
+            cart.setTotalAmount(cart.getTotalAmount().add(itemSelling));
+        }
+        return cartRepo.save(cart);
     }
 }

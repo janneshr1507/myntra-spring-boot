@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -83,4 +85,7 @@ public class Item {
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    @OneToOne(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Inventory> inventoryList = new ArrayList<>();
 }

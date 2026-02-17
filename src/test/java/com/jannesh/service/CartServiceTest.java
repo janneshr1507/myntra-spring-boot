@@ -1,10 +1,16 @@
 package com.jannesh.service;
 
+import com.jannesh.dto.cart.AddItemDTO;
+import com.jannesh.dto.cartItem.CartItemDTO;
 import com.jannesh.entity.Cart;
 import com.jannesh.entity.CartItem;
+import com.jannesh.entity.Inventory;
 import com.jannesh.entity.Item;
 import com.jannesh.repository.CartItemRepository;
 import com.jannesh.repository.CartRepository;
+import com.jannesh.util.enums.CartStatus;
+import com.jannesh.util.mapper.CartItemMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,9 +20,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +35,14 @@ public class CartServiceTest {
     private CartItemRepository cartItemRepo;
     @Mock
     private CartRepository cartRepo;
+    @Mock
+    private InventoryService inventoryService;
+    @Mock
+    private CustomerService customerService;
+    @Mock
+    private ItemService itemService;
+    @Mock
+    private CartItemMapper cartItemMapper;
     @InjectMocks
     private CartService cartService;
 
@@ -89,5 +105,87 @@ public class CartServiceTest {
         Cart savedCart = cartService.calculateCartAmount(cart);
 
         assertEquals(BigDecimal.ZERO, savedCart.getTotalDiscount());
+    }
+
+    @Test
+    public void shouldRemoveItemFromCartSuccessfully() {
+        UUID cartId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+        UUID cartItemId = UUID.randomUUID();
+
+        CartItem cartItem = new CartItem();
+        cartItem.setCartItemId(cartItemId);
+        cartItem.setQuantity(10L);
+
+        Inventory inventory = new Inventory();
+        inventory.setAvailableQty(10L);
+        inventory.setReservedQty(10L);
+
+        when(cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)).thenReturn(Optional.of(cartItem));
+        when(inventoryService.fetchInventoryByItemId(itemId)).thenReturn(inventory);
+
+        cartService.removeCartItem(cartId, itemId);
+
+        assertEquals(20L, inventory.getAvailableQty());
+        assertEquals(0L, inventory.getReservedQty());
+    }
+
+    @Test
+    public void shouldThrowErrorWhenTryingToRemoveCartItemWhenNotFound() {
+        UUID cartId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+
+        when(cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)).thenReturn(Optional.empty());
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> {
+           cartService.removeCartItem(cartId, itemId);
+        });
+
+        assertEquals("Cart Item not found", ex.getMessage());
+    }
+
+    @Test
+    public void shouldAddItemToCartSuccessfully() {
+        UUID customerId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+        UUID inventoryId = UUID.randomUUID();
+        UUID cartId = UUID.randomUUID();
+
+        Item item = new Item();
+        item.setItemId(itemId);
+        item.setSellingPrice(BigDecimal.valueOf(100));
+
+        Inventory inventory = new Inventory();
+        inventory.setInventoryId(inventoryId);
+        inventory.setAvailableQty(10L);
+        inventory.setReservedQty(0L);
+
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+
+        when(customerService.existsByCustomerId(customerId)).thenReturn(true);
+        when(itemService.fetchItemByItemId(itemId)).thenReturn(item);
+        when(inventoryService.fetchInventoryByItemId(itemId)).thenReturn(inventory);
+        when(cartRepo.findByCustomer_CustomerIdAndStatus(customerId, CartStatus.OPEN)).thenReturn(Optional.of(cart));
+        when(cartItemRepo.save(any(CartItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(cartItemMapper.toDTO(any(CartItem.class))).thenAnswer(invocation -> {
+           CartItem savedCartItem = invocation.getArgument(0);
+           CartItemDTO cartItemDTO = new CartItemDTO();
+           cartItemDTO.setQuantity(savedCartItem.getQuantity());
+           cartItemDTO.setAmount(savedCartItem.getAmount());
+           return cartItemDTO;
+        });
+
+        AddItemDTO requestDTO = new AddItemDTO();
+        requestDTO.setCustomerId(customerId);
+        requestDTO.setItemId(itemId);
+        requestDTO.setQuantity(10L);
+
+        CartItemDTO savedCartItemDTO = cartService.addItemToCart(requestDTO);
+
+        assertEquals(0L, inventory.getAvailableQty());
+        assertEquals(10L, inventory.getReservedQty());
+        assertEquals(10L, savedCartItemDTO.getQuantity());
+        assertEquals(BigDecimal.valueOf(100), savedCartItemDTO.getAmount());
     }
 }

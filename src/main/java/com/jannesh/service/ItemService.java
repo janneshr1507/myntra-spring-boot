@@ -40,4 +40,8 @@ public class ItemService {
         return itemRepo.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
     }
+
+    public boolean existsByItemId(UUID itemId) {
+        return itemRepo.existsById(itemId);
+    }
 }

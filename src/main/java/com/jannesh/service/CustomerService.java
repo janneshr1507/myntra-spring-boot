@@ -4,6 +4,7 @@ import com.jannesh.dto.customer.CustomerDTO;
 import com.jannesh.dto.customer.SaveCustomerDTO;
 import com.jannesh.entity.Customer;
 import com.jannesh.repository.CustomerRepository;
+import com.jannesh.util.enums.CustomerStatus;
 import com.jannesh.util.mapper.CustomerMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +26,9 @@ public class CustomerService {
     public Customer fetchCustomerByCustomerId(UUID customerId) {
         return customerRepo.findById(customerId)
                 .orElseThrow(() -> new EntityNotFoundException("Customer Not Found"));
+    }
+
+    public boolean existsByCustomerId(UUID customerId) {
+        return customerRepo.existsByCustomerIdAndCustomerStatus(customerId, CustomerStatus.ACTIVE);
     }
 }

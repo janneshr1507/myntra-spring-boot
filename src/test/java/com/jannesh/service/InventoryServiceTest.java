@@ -54,7 +54,7 @@ public class InventoryServiceTest {
         when(mapper.toDTO(any(Inventory.class))).thenAnswer(invocation -> {
             Inventory savedInventory = invocation.getArgument(0);
             InventoryDTO savedInventoryDTO = new InventoryDTO();
-            savedInventoryDTO.setAvailableQty(inventory.getAvailableQty());
+            savedInventoryDTO.setAvailableQty(savedInventory.getAvailableQty());
             return savedInventoryDTO;
         });
 

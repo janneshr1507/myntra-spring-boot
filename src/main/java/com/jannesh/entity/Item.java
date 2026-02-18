@@ -86,6 +86,6 @@ public class Item {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @OneToOne(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inventory> inventoryList = new ArrayList<>();
 }

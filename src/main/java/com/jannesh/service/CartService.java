@@ -73,7 +73,7 @@ public class CartService {
         return cartItemMapper.toDTO(cartItemRepo.save(cartItem));
     }
 
-    public void removeCartItem(UUID cartId, UUID itemId) {
+    public void removeItemFromCart(UUID cartId, UUID itemId) {
         CartItem cartItem = cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart Item not found"));
 

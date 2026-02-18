@@ -124,21 +124,21 @@ public class CartServiceTest {
         when(cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)).thenReturn(Optional.of(cartItem));
         when(inventoryService.fetchInventoryByItemId(itemId)).thenReturn(inventory);
 
-        cartService.removeCartItem(cartId, itemId);
+        cartService.removeItemFromCart(cartId, itemId);
 
         assertEquals(20L, inventory.getAvailableQty());
         assertEquals(0L, inventory.getReservedQty());
     }
 
     @Test
-    public void shouldThrowErrorWhenTryingToRemoveCartItemWhenNotFound() {
+    public void shouldThrowErrorWhenTryingToRemoveItemFromCartWhenNotFound() {
         UUID cartId = UUID.randomUUID();
         UUID itemId = UUID.randomUUID();
 
         when(cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)).thenReturn(Optional.empty());
 
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> {
-           cartService.removeCartItem(cartId, itemId);
+           cartService.removeItemFromCart(cartId, itemId);
         });
 
         assertEquals("Cart Item not found", ex.getMessage());

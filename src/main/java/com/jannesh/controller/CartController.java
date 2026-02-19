@@ -1,6 +1,8 @@
 package com.jannesh.controller;
 
 import com.jannesh.dto.cart.AddItemDTO;
+import com.jannesh.dto.cartItem.UpdateCartItemDTO;
+import com.jannesh.service.CartItemService;
 import com.jannesh.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,10 +16,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
+    private final CartItemService cartItemService;
 
     @PostMapping("/addItem")
     public ResponseEntity<?> addItemToCart(@RequestBody AddItemDTO addItemDTO) {
         return new ResponseEntity<>(cartService.addItemToCart(addItemDTO), HttpStatus.OK);
+    }
+
+    @PostMapping("/updateItem")
+    public ResponseEntity<?> updateItemInCart(@RequestBody UpdateCartItemDTO  updateCartItemDTO) {
+        return new ResponseEntity<>(cartItemService.updateCartItemDTO(updateCartItemDTO), HttpStatus.OK);
     }
 
     @GetMapping("/delete/{cartId}/{itemId}")

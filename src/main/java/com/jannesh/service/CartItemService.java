@@ -1,6 +1,7 @@
 package com.jannesh.service;
 
 import com.jannesh.dto.cartItem.CartItemDTO;
+import com.jannesh.dto.cartItem.UpdateCartItemDTO;
 import com.jannesh.entity.CartItem;
 import com.jannesh.repository.CartItemRepository;
 import com.jannesh.util.mapper.CartItemMapper;
@@ -32,7 +33,7 @@ public class CartItemService {
     }
 
     public List<CartItem> fetchCartItem(UUID cartId) {
-        return cartItemRepo.findByCart_CartId(cartId);
+        return cartItemRepo.findByCart_CartIdWithItem(cartId);
     }
 
     public List<CartItemDTO> fetchCartItemDTO(UUID cartId) {
@@ -49,5 +50,14 @@ public class CartItemService {
 
     public void deleteCartItem(UUID cartItemId) {
         cartItemRepo.deleteById(cartItemId);
+    }
+
+    public CartItemDTO updateCartItemDTO(UpdateCartItemDTO updateCartItemDTO) {
+        CartItem cartItem = cartItemRepo.findById(updateCartItemDTO.getCartItemId())
+                .orElseThrow(() -> new EntityNotFoundException("CartItem Not Found"));
+
+        cartItem.setQuantity(updateCartItemDTO.getQuantity());
+
+        return mapper.toDTO(cartItemRepo.save(cartItem));
     }
 }

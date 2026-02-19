@@ -27,8 +27,14 @@ public class OrderItem {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
-    private BigDecimal price;
+    @Column(nullable = false, precision = 8, scale = 2)
+    private BigDecimal actualPrice;
+
+    @Column(nullable = false, precision = 3, scale = 2)
+    private BigDecimal discount;
+
+    @Column(nullable = false, precision = 8, scale = 2)
+    private BigDecimal sellingPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -11,30 +11,29 @@ import java.util.UUID;
 
 @Entity
 @Getter @Setter
-@ToString
 public class CartItem {
     @Id
-    public UUID cartItemId;
+    private UUID cartItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
-    public Cart cart;
+    private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
-    public Item item;
+    private Item item;
 
     @Column(nullable = false)
-    public Long quantity;
+    private Long quantity;
 
     @Column(nullable = false)
-    public BigDecimal amount;
+    private BigDecimal amount;
 
     @Column(nullable = false, updatable = false)
-    public LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    public LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void onCreate() {

@@ -9,6 +9,7 @@ import com.jannesh.util.enums.CartStatus;
 import com.jannesh.util.mapper.CartMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -42,31 +43,47 @@ public class CartService {
                 .orElseGet(() -> createCart(customerId));
     }
 
-    public CartItemDTO addItemToCart(AddItemDTO addItemDTO) {
+    public CartDTO addItemToCart(AddItemDTO addItemDTO) {
+        //Check Customer Status
         boolean customerStatus = customerService.existsByCustomerId(addItemDTO.getCustomerId());
         if(!customerStatus) throw new EntityNotFoundException("Customer Not Found");
 
+        //Check Item Status
         Item item = itemService.fetchItemByItemId(addItemDTO.getItemId());
 
-        Inventory inventory = inventoryService.fetchInventoryByItemId(addItemDTO.getItemId());
-        if(addItemDTO.getQuantity() > inventory.getAvailableQty()) {
-            throw new RuntimeException("Stock Not Available");
-        }
+        //Check Inventory Status & Reserve Stock if available
+        inventoryService.reserveInventoryForCart(addItemDTO.getItemId(), addItemDTO.getQuantity());
 
+        //Fetch existing open cart for the customer or create new
         Cart cart = fetchCartByCustomerId(addItemDTO.getCustomerId());
-        CartItem cartItem = new CartItem();
 
+        //Prepare Item (If Item already present in the Cart then update quantity)
+        CartItem cartItem = cartItemService.fetchCartItem(cart.getCartId(), addItemDTO.getItemId());
         cartItem.setCart(cart);
         cartItem.setItem(item);
+        if(cartItem.getCartItemId() == null) {
+            cartItem.setQuantity(addItemDTO.getQuantity());
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() + addItemDTO.getQuantity());
+        }
 
-        inventory.setAvailableQty(inventory.getAvailableQty() - addItemDTO.getQuantity());
-        inventory.setReservedQty(inventory.getReservedQty() + addItemDTO.getQuantity());
-        inventoryService.createInventory(inventory);
+        //Calculating amount by multiplying sellingPrice and quantity.
+        cartItem.setAmount(item.getSellingPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
 
-        cartItem.setQuantity(addItemDTO.getQuantity());
-        cartItem.setAmount(item.getSellingPrice());
+        //Add Item to the Cart
+        cartItemService.createCartItem(cartItem);
 
-        return cartItemService.createCartItemDTO(cartItem);
+        //Calculate Cart Amount !!!NEED TO FIX ==> LOADING ITEM TO AVOID LAZY LOADING ISSUE!!!
+        calculateCartAmount(cart, cartItemService.fetchCartItemByCartItemId(cartItem.getCartItemId()));
+
+        //Save Cart in the DB
+        Cart updatedCart = cartRepo.save(cart);
+
+        //Prepare for Response
+        CartDTO cartDTO = mapper.toDTO(cart);
+        List<CartItemDTO> cartItemDTOList = cartItemService.fetchCartItemDTO(updatedCart.getCartId());
+        cartDTO.setCartItemList(cartItemDTOList);
+        return cartDTO;
     }
 
     public void removeItemFromCart(UUID cartId, UUID itemId) {
@@ -132,4 +149,16 @@ public class CartService {
         }
         return cartRepo.save(cart);
     }
+
+    public void calculateCartAmount(Cart cart, CartItem cartItem) {
+
+        BigDecimal totalMRP = cart.getTotalMRP().add(cartItem.getItem().getActualPrice());
+        BigDecimal totalDiscount = cart.getTotalDiscount().add(cartItem.getItem().getActualPrice().subtract(cartItem.getItem().getSellingPrice()));
+        BigDecimal totalAmount = cart.getTotalAmount().add(cartItem.getItem().getSellingPrice());
+
+        cart.setTotalMRP(totalMRP);
+        cart.setTotalDiscount(totalDiscount);
+        cart.setTotalAmount(totalAmount);
+    }
+
 }

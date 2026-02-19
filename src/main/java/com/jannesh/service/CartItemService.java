@@ -28,8 +28,8 @@ public class CartItemService {
     }
 
     public CartItem fetchCartItem(UUID cartId, UUID itemId) {
-        return cartItemRepo.findByCart_CartIdAndItem_ItemId(cartId, itemId)
-                .orElseThrow(() -> new EntityNotFoundException("CartItem Not Found"));
+        return cartItemRepo.findByCart_CartIdAndItem_ItemIdWithItem(cartId, itemId)
+                .orElse(new CartItem());
     }
 
     public List<CartItem> fetchCartItem(UUID cartId) {
@@ -59,5 +59,10 @@ public class CartItemService {
         cartItem.setQuantity(updateCartItemDTO.getQuantity());
 
         return mapper.toDTO(cartItemRepo.save(cartItem));
+    }
+
+    public CartItem fetchCartItemByCartItemId(UUID cartItemId) {
+        return cartItemRepo.findByIdWithItem(cartItemId)
+                .orElseThrow(() -> new EntityNotFoundException("CartItem Not Found"));
     }
 }

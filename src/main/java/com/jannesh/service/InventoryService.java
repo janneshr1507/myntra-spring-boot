@@ -42,4 +42,16 @@ public class InventoryService {
     public InventoryDTO fetchInventoryDTOByItemId(UUID itemId) {
         return mapper.toDTO(fetchInventoryByItemId(itemId));
     }
+
+    public void reserveInventoryForCart(UUID itemId, Long quantity) {
+        Inventory inventory = fetchInventoryByItemId(itemId);
+        if(quantity > inventory.getAvailableQty()) {
+            throw new RuntimeException("Stock Not Available");
+        }
+
+        inventory.setAvailableQty(inventory.getAvailableQty() - quantity);
+        inventory.setReservedQty(inventory.getReservedQty() + quantity);
+        createInventory(inventory);
+    }
+
 }

@@ -30,10 +30,10 @@ public class Cart {
     private CartStatus status;
 
     @Column(nullable = false, updatable = false)
-    public LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    public LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void onCreate() {

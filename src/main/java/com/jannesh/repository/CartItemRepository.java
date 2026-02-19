@@ -11,7 +11,10 @@ import java.util.UUID;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
-    Optional<CartItem> findByCart_CartIdAndItem_ItemId(UUID cartId, UUID itemId);
+
+    @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.item WHERE ci.cart.cartId=:cartId AND ci.item.itemId = :itemId")
+    Optional<CartItem> findByCart_CartIdAndItem_ItemIdWithItem(UUID cartId, UUID itemId);
+
     @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.item WHERE ci.cart.cartId=:cartId")
     List<CartItem> findByCart_CartIdWithItem(UUID cartId);
 

@@ -84,6 +84,8 @@ public class Item {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+        this.itemStatus = ItemStatus.ACTIVE;
+        this.sellingPrice = this.actualPrice.subtract(this.actualPrice.multiply(this.discount)).setScale(2, RoundingMode.HALF_UP);
     }
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)

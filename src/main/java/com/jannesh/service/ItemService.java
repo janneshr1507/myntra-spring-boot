@@ -2,6 +2,7 @@ package com.jannesh.service;
 
 import com.jannesh.dto.item.ItemDTO;
 import com.jannesh.dto.item.SaveItemDTO;
+import com.jannesh.dto.item.UpdateItemDTO;
 import com.jannesh.entity.Item;
 import com.jannesh.entity.Vendor;
 import com.jannesh.entity.Warehouse;
@@ -43,5 +44,11 @@ public class ItemService {
 
     public boolean existsByItemId(UUID itemId) {
         return itemRepo.existsById(itemId);
+    }
+
+    public ItemDTO updateItemDetails(UpdateItemDTO requestDTO) {
+        Item item = fetchItemByItemId(requestDTO.getItemId());
+        mapper.toEntity(requestDTO, item);
+        return mapper.toDTO(itemRepo.save(item));
     }
 }

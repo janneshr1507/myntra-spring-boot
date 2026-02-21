@@ -2,7 +2,6 @@ package com.jannesh.service;
 
 import com.jannesh.dto.item.ItemDTO;
 import com.jannesh.dto.item.SaveItemDTO;
-import com.jannesh.dto.item.UpdateItemDTO;
 import com.jannesh.entity.Item;
 import com.jannesh.entity.Vendor;
 import com.jannesh.entity.Warehouse;

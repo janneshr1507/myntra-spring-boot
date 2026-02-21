@@ -2,7 +2,6 @@ package com.jannesh.controller;
 
 import com.jannesh.dto.item.ItemDTO;
 import com.jannesh.dto.item.SaveItemDTO;
-import com.jannesh.dto.item.UpdateItemDTO;
 import com.jannesh.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

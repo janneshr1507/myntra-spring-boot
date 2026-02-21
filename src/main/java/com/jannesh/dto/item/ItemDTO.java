@@ -6,11 +6,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter @Setter
 @ToString
-@JsonPropertyOrder({"itemId","vendorId","warehouseId","brand","model","price","color","size","fit","material","actualPrice","discount","sellingPrice","averageRatings","totalNumberOfRatings"})
+@JsonPropertyOrder({"itemId","vendorId","warehouseId","brand","model","price","color",
+        "size","fit","material","actualPrice","discount","sellingPrice","averageRatings",
+        "totalNumberOfRatings","createdAt","updatedAt"})
 public class ItemDTO {
     private UUID itemId;
     private UUID vendorId;
@@ -26,4 +29,6 @@ public class ItemDTO {
     private BigDecimal sellingPrice;
     private BigDecimal averageRatings;
     private Long totalNumberOfRatings;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

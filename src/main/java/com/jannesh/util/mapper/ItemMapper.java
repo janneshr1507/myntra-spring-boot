@@ -2,11 +2,9 @@ package com.jannesh.util.mapper;
 
 import com.jannesh.dto.item.ItemDTO;
 import com.jannesh.dto.item.SaveItemDTO;
-import com.jannesh.dto.item.UpdateItemDTO;
 import com.jannesh.entity.Item;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ItemMapper {
@@ -20,6 +18,4 @@ public interface ItemMapper {
     Item toEntity(ItemDTO itemDTO);
 
     Item toEntity(SaveItemDTO requestDTO);
-
-    void toEntity(UpdateItemDTO requestDTO,@MappingTarget Item item);
 }

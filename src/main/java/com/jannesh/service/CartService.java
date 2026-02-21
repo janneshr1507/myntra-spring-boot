@@ -8,12 +8,11 @@ import com.jannesh.repository.CartRepository;
 import com.jannesh.util.enums.CartStatus;
 import com.jannesh.util.mapper.CartMapper;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,11 +26,8 @@ public class CartService {
     private final CartItemService cartItemService;
     private final CartMapper mapper;
 
+    @Transactional
     public Cart createCart(UUID customerId) {
-        boolean status = cartRepo.existsByCustomer_CustomerIdAndStatus(customerId, CartStatus.OPEN);
-        if(status)
-            throw new RuntimeException("Already cart is open on the given customerId");
-
         Cart cart = new Cart();
         Customer customer = customerService.fetchCustomerByCustomerId(customerId);
         cart.setCustomer(customer);
@@ -39,10 +35,11 @@ public class CartService {
     }
 
     public Cart fetchCartByCustomerId(UUID customerId) {
-        return cartRepo.findByCustomer_CustomerIdAndStatus(customerId, CartStatus.OPEN)
-                .orElseGet(() -> createCart(customerId));
+        return cartRepo.findByCustomer_CustomerIdAndCartStatus(customerId, CartStatus.OPEN)
+                .orElseGet(() -> createCart((customerId)));
     }
 
+    @Transactional
     public CartDTO addItemToCart(AddItemDTO addItemDTO) {
         //Check Customer Status
         boolean customerStatus = customerService.existsByCustomerId(addItemDTO.getCustomerId());
@@ -59,9 +56,9 @@ public class CartService {
 
         //Prepare Item (If Item already present in the Cart then update quantity)
         CartItem cartItem = cartItemService.fetchCartItem(cart.getCartId(), addItemDTO.getItemId());
-        cartItem.setCart(cart);
-        cartItem.setItem(item);
         if(cartItem.getCartItemId() == null) {
+            cartItem.setCart(cart);
+            cartItem.setItem(item);
             cartItem.setQuantity(addItemDTO.getQuantity());
         } else {
             cartItem.setQuantity(cartItem.getQuantity() + addItemDTO.getQuantity());
@@ -74,13 +71,13 @@ public class CartService {
         cartItemService.createCartItem(cartItem);
 
         //Calculate Cart Amount !!!NEED TO FIX ==> LOADING ITEM TO AVOID LAZY LOADING ISSUE!!!
-        calculateCartAmount(cart, cartItemService.fetchCartItemByCartItemId(cartItem.getCartItemId()));
+        calculateCartAmountWhenItemAdded(cart, cartItemService.fetchCartItemByCartItemId(cartItem.getCartItemId()));
 
         //Save Cart in the DB
         Cart updatedCart = cartRepo.save(cart);
 
         //Prepare for Response
-        CartDTO cartDTO = mapper.toDTO(cart);
+        CartDTO cartDTO = mapper.toDTO(updatedCart);
         List<CartItemDTO> cartItemDTOList = cartItemService.fetchCartItemDTO(updatedCart.getCartId());
         cartDTO.setCartItemList(cartItemDTOList);
         return cartDTO;
@@ -97,23 +94,25 @@ public class CartService {
         cartItemService.deleteCartItem(cartItem.getCartItemId());
     }
 
-    public List<CartDTO> fetchCartList() {
-        List<Cart> cartList = cartRepo.findAll();
+    public void removeItemFromCart(UUID cartItemId) {
+        CartItem cartItem = cartItemService.fetchCartItemByCartItemId(cartItemId);
 
-        List<CartDTO> cartDTOList = new ArrayList<>();
-        for(Cart cart: cartList) {
-            CartDTO cartDTO = mapper.toDTO(calculateCartAmount(cart));
-            cartDTO.setCartItemList(cartItemService.fetchCartItemDTO(cart.getCartId()));
-            cartDTOList.add(cartDTO);
-        }
+        Inventory inventory = inventoryService.fetchInventoryByItemId(cartItem.getItem().getItemId());
+        inventory.setAvailableQty(inventory.getAvailableQty() + cartItem.getQuantity());
+        inventory.setReservedQty(inventory.getReservedQty() - cartItem.getQuantity());
+        inventoryService.createInventory(inventory);
 
-        return cartDTOList;
+        cartItemService.deleteCartItem(cartItem.getCartItemId());
     }
 
     public Cart fetchCartByCartId(UUID cartId) {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart Not Found"));
-        return calculateCartAmount(cart);
+
+        List<CartItem> cartItemList = cartItemService.fetchCartItem(cart.getCartId());
+
+        cart.setCartItemList(cartItemList);
+        return cart;
     }
 
     public CartDTO fetchCartDTOByCartId(UUID cartId) {
@@ -150,7 +149,7 @@ public class CartService {
         return cartRepo.save(cart);
     }
 
-    public void calculateCartAmount(Cart cart, CartItem cartItem) {
+    public void calculateCartAmountWhenItemAdded(Cart cart, CartItem cartItem) {
 
         BigDecimal totalMRP = cart.getTotalMRP().add(cartItem.getItem().getActualPrice());
         BigDecimal totalDiscount = cart.getTotalDiscount().add(cartItem.getItem().getActualPrice().subtract(cartItem.getItem().getSellingPrice()));
@@ -160,5 +159,4 @@ public class CartService {
         cart.setTotalDiscount(totalDiscount);
         cart.setTotalAmount(totalAmount);
     }
-
 }

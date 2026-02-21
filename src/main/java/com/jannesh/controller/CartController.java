@@ -1,8 +1,6 @@
 package com.jannesh.controller;
 
 import com.jannesh.dto.cart.AddItemDTO;
-import com.jannesh.dto.cartItem.UpdateCartItemDTO;
-import com.jannesh.service.CartItemService;
 import com.jannesh.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,32 +14,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
-    private final CartItemService cartItemService;
+
+    @GetMapping("/get/{cartId}")
+    public ResponseEntity<?> getCartDTOByCartId(@PathVariable("cartId") UUID cartId) {
+        return new ResponseEntity<>(cartService.fetchCartDTOByCartId(cartId), HttpStatus.OK);
+    }
 
     @PostMapping("/addItem")
     public ResponseEntity<?> addItemToCart(@RequestBody AddItemDTO addItemDTO) {
         return new ResponseEntity<>(cartService.addItemToCart(addItemDTO), HttpStatus.OK);
     }
 
-    @PostMapping("/updateItem")
-    public ResponseEntity<?> updateItemInCart(@RequestBody UpdateCartItemDTO  updateCartItemDTO) {
-        return new ResponseEntity<>(cartItemService.updateCartItemDTO(updateCartItemDTO), HttpStatus.OK);
-    }
-
-    @GetMapping("/delete/{cartId}/{itemId}")
-    public ResponseEntity<?> deleteItemFromCart(@PathVariable("cartId") UUID cartId, @PathVariable("itemId") UUID itemId) {
-        cartService.removeItemFromCart(cartId, itemId);
+    @GetMapping("/delete/{cartItemId}")
+    public ResponseEntity<?> deleteItemFromCart(@PathVariable("cartItemId") UUID cartItemId) {
+        cartService.removeItemFromCart(cartItemId);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/getAll")
-    public ResponseEntity<?> getCartList() {
-        return new ResponseEntity<>(cartService.fetchCartList(), HttpStatus.OK);
-    }
-
-    @GetMapping("/getByCartId/{cartId}")
-    public ResponseEntity<?> getCartDTOByCartId(@PathVariable("cartId") UUID cartId) {
-        return new ResponseEntity<>(cartService.fetchCartDTOByCartId(cartId), HttpStatus.OK);
     }
 
 }

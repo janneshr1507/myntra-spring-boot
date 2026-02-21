@@ -54,4 +54,12 @@ public class InventoryService {
         createInventory(inventory);
     }
 
+    public void releaseInventoryFromCart(UUID itemId, Long quantity) {
+        Inventory inventory = fetchInventoryByItemId(itemId);
+
+        inventory.setAvailableQty(inventory.getAvailableQty() + quantity);
+        inventory.setReservedQty(inventory.getReservedQty() - quantity);
+        createInventory(inventory);
+    }
+
 }

@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@NamedEntityGraph(
+        name = "Cart.withCartItems",
+        attributeNodes = @NamedAttributeNode("cartItemList"))
+
 @Entity
 @Getter @Setter
 public class Cart {

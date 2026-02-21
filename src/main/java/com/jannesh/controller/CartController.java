@@ -27,8 +27,7 @@ public class CartController {
 
     @GetMapping("/delete/{cartItemId}")
     public ResponseEntity<?> deleteItemFromCart(@PathVariable("cartItemId") UUID cartItemId) {
-        cartService.removeItemFromCart(cartItemId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(cartService.removeItemFromCart(cartItemId), HttpStatus.OK);
     }
 
 }

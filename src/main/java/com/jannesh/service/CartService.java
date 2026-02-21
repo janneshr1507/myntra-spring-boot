@@ -83,77 +83,43 @@ public class CartService {
         return cartDTO;
     }
 
-    public void removeItemFromCart(UUID cartId, UUID itemId) {
-        CartItem cartItem = cartItemService.fetchCartItem(cartId, itemId);
-
-        Inventory inventory = inventoryService.fetchInventoryByItemId(itemId);
-        inventory.setAvailableQty(inventory.getAvailableQty() + cartItem.getQuantity());
-        inventory.setReservedQty(inventory.getReservedQty() - cartItem.getQuantity());
-        inventoryService.createInventory(inventory);
-
-        cartItemService.deleteCartItem(cartItem.getCartItemId());
-    }
-
-    public void removeItemFromCart(UUID cartItemId) {
+    public CartDTO removeItemFromCart(UUID cartItemId) {
         CartItem cartItem = cartItemService.fetchCartItemByCartItemId(cartItemId);
-
-        Inventory inventory = inventoryService.fetchInventoryByItemId(cartItem.getItem().getItemId());
-        inventory.setAvailableQty(inventory.getAvailableQty() + cartItem.getQuantity());
-        inventory.setReservedQty(inventory.getReservedQty() - cartItem.getQuantity());
-        inventoryService.createInventory(inventory);
-
         cartItemService.deleteCartItem(cartItem.getCartItemId());
+
+        calculateCartAmountWhenItemRemove(cartItem.getCart(), cartItem);
+        cartRepo.save(cartItem.getCart());
+
+        inventoryService.releaseInventoryFromCart(cartItem.getItem().getItemId(), cartItem.getQuantity());
+
+        return fetchCartDTOByCartId(cartItem.getCart().getCartId());
     }
 
     public Cart fetchCartByCartId(UUID cartId) {
-        Cart cart = cartRepo.findById(cartId)
+        return cartRepo.findByCartId(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart Not Found"));
-
-        List<CartItem> cartItemList = cartItemService.fetchCartItem(cart.getCartId());
-
-        cart.setCartItemList(cartItemList);
-        return cart;
     }
 
+    @Transactional
     public CartDTO fetchCartDTOByCartId(UUID cartId) {
         Cart cart = fetchCartByCartId(cartId);
-        CartDTO cartDTO = mapper.toDTO(cart);
-
-        List<CartItemDTO> cartItemDTOList = cartItemService.fetchCartItemDTO(cartId);
-        cartDTO.setCartItemList(cartItemDTOList);
-
-        return cartDTO;
-    }
-
-    public Cart calculateCartAmount(Cart cart) {
-
-        cart.setTotalDiscount(BigDecimal.ZERO);
-        cart.setTotalMRP(BigDecimal.ZERO);
-        cart.setTotalAmount(BigDecimal.ZERO);
-
-        List<CartItem> cartItemList = cartItemService.fetchCartItem(cart.getCartId());
-        for(CartItem cartItem: cartItemList) {
-            Item item = cartItem.getItem();
-            BigDecimal quantity = BigDecimal.valueOf(cartItem.getQuantity());
-
-            BigDecimal itemMRP = item.getActualPrice().multiply(quantity);
-            BigDecimal itemDiscount = item.getActualPrice()
-                            .multiply(item.getDiscount())
-                            .multiply(quantity);
-            BigDecimal itemSelling = item.getSellingPrice().multiply(quantity);
-
-            cart.setTotalMRP(cart.getTotalMRP().add(itemMRP));
-            cart.setTotalDiscount(cart.getTotalDiscount().add(itemDiscount));
-            cart.setTotalAmount(cart.getTotalAmount().add(itemSelling));
-        }
-        return cartRepo.save(cart);
+        return mapper.toDTO(cart);
     }
 
     public void calculateCartAmountWhenItemAdded(Cart cart, CartItem cartItem) {
-
         BigDecimal totalMRP = cart.getTotalMRP().add(cartItem.getItem().getActualPrice());
         BigDecimal totalDiscount = cart.getTotalDiscount().add(cartItem.getItem().getActualPrice().subtract(cartItem.getItem().getSellingPrice()));
         BigDecimal totalAmount = cart.getTotalAmount().add(cartItem.getItem().getSellingPrice());
+
+        cart.setTotalMRP(totalMRP);
+        cart.setTotalDiscount(totalDiscount);
+        cart.setTotalAmount(totalAmount);
+    }
+
+    public void calculateCartAmountWhenItemRemove(Cart cart, CartItem cartItem) {
+        BigDecimal totalMRP = cart.getTotalMRP().subtract(cartItem.getItem().getActualPrice());
+        BigDecimal totalDiscount = cart.getTotalDiscount().subtract(cartItem.getItem().getActualPrice().subtract(cartItem.getItem().getSellingPrice()));
+        BigDecimal totalAmount = cart.getTotalAmount().subtract(cartItem.getItem().getSellingPrice());
 
         cart.setTotalMRP(totalMRP);
         cart.setTotalDiscount(totalDiscount);

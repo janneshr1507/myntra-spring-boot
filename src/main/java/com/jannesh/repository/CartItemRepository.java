@@ -18,6 +18,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.item WHERE ci.cart.cartId=:cartId")
     List<CartItem> findByCart_CartIdWithItem(UUID cartId);
 
-    @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.item WHERE ci.cartItemId=:cartItemId")
+    @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.item JOIN FETCH ci.cart WHERE ci.cartItemId=:cartItemId")
     Optional<CartItem> findByIdWithItem(UUID cartItemId);
 }

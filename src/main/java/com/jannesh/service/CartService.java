@@ -85,6 +85,10 @@ public class CartService {
 
     public CartDTO removeItemFromCart(UUID cartItemId) {
         CartItem cartItem = cartItemService.fetchCartItemByCartItemId(cartItemId);
+
+        if(cartItem.getCart().getCartStatus() == CartStatus.CLOSED)
+            throw new RuntimeException("You cannot remove item from closed cart");
+
         cartItemService.deleteCartItem(cartItem.getCartItemId());
 
         calculateCartAmountWhenItemRemove(cartItem.getCart(), cartItem);
@@ -95,14 +99,23 @@ public class CartService {
         return fetchCartDTOByCartId(cartItem.getCart().getCartId());
     }
 
-    public Cart fetchCartByCartId(UUID cartId) {
+    public Cart fetchCartByCartIdWithCartItemDetails(UUID cartId) {
         return cartRepo.findByCartId(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart Not Found"));
     }
 
+    public Cart fetchCartByCartId(UUID cartId) {
+        return cartRepo.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart Not Found"));
+    }
+
+    public Cart updateCartDetails(Cart cart) {
+        return cartRepo.save(cart);
+    }
+
     @Transactional
     public CartDTO fetchCartDTOByCartId(UUID cartId) {
-        Cart cart = fetchCartByCartId(cartId);
+        Cart cart = fetchCartByCartIdWithCartItemDetails(cartId);
         return mapper.toDTO(cart);
     }
 

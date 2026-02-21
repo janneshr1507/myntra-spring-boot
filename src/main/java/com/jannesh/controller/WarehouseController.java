@@ -16,12 +16,12 @@ import java.util.UUID;
 public class WarehouseController {
     private final WarehouseService warehouseService;
 
-    @GetMapping("/getByWarehouseId/{warehouseId}")
+    @GetMapping("/getByWarehouse/{warehouseId}")
     public ResponseEntity<?> getWarehouseByWarehouseId(@PathVariable UUID warehouseId) {
         return new ResponseEntity<>(warehouseService.fetchWarehouseDTOByWarehouseId(warehouseId), HttpStatus.OK);
     }
 
-    @GetMapping("/getByVendorId/{vendorId}")
+    @GetMapping("/getByVendor/{vendorId}")
     public ResponseEntity<?> getWarehouseListByVendorId(@PathVariable UUID vendorId) {
         return new ResponseEntity<>(warehouseService.fetchWarehouseListByVendorId(vendorId), HttpStatus.OK);
     }
@@ -29,10 +29,5 @@ public class WarehouseController {
     @PostMapping("/save")
     public ResponseEntity<?> saveWarehouse(@RequestBody SaveWarehouseDTO requestDTO) {
         return new ResponseEntity<>(warehouseService.createWarehouseDTO(requestDTO), HttpStatus.OK);
-    }
-
-    @GetMapping("/modify/warehouseStatus/{warehouseId}/{status}")
-    public ResponseEntity<?> changeWarehouseStatus(@PathVariable("warehouseId") UUID warehouseId, @PathVariable("status") WarehouseStatus status) {
-        return new ResponseEntity<>(warehouseService.modifyWarehouseStatus(warehouseId, status), HttpStatus.OK);
     }
 }

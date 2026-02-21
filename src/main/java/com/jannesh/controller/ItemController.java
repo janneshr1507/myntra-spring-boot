@@ -17,7 +17,7 @@ import java.util.UUID;
 public class ItemController {
     private final ItemService itemService;
 
-    @GetMapping("/{itemId}")
+    @GetMapping("/get/{itemId}")
     public ResponseEntity<?> getItemById(@PathVariable("itemId") UUID itemId) {
         ItemDTO itemDTO = itemService.fetchItemDTOByItemId(itemId);
         return new ResponseEntity<>(itemDTO, HttpStatus.OK);
@@ -27,11 +27,6 @@ public class ItemController {
     public ResponseEntity<?> saveItem(@RequestBody SaveItemDTO requestDTO) {
         ItemDTO itemDTO = itemService.createItemDTO(requestDTO);
         return new ResponseEntity<>(itemDTO, HttpStatus.OK);
-    }
-
-    @PostMapping("/update")
-    public ResponseEntity<?> updateItem(@RequestBody UpdateItemDTO requestDTO) {
-        return new ResponseEntity<>(itemService.updateItemDetails(requestDTO), HttpStatus.OK);
     }
 
 }

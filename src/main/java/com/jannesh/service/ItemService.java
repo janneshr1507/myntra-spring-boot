@@ -45,10 +45,4 @@ public class ItemService {
     public boolean existsByItemId(UUID itemId) {
         return itemRepo.existsById(itemId);
     }
-
-    public ItemDTO updateItemDetails(UpdateItemDTO requestDTO) {
-        Item item = fetchItemByItemId(requestDTO.getItemId());
-        mapper.toEntity(requestDTO, item);
-        return mapper.toDTO(itemRepo.save(item));
-    }
 }

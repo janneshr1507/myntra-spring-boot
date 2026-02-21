@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +28,11 @@ public class ItemController {
     public ResponseEntity<?> saveItem(@RequestBody SaveItemDTO requestDTO) {
         ItemDTO itemDTO = itemService.createItemDTO(requestDTO);
         return new ResponseEntity<>(itemDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/updateDiscount/{itemId}/{discount}")
+    public ResponseEntity<?> updateDiscount(@PathVariable("itemId") UUID itemId, @PathVariable("discount")BigDecimal discount) {
+        return new ResponseEntity<>(itemService.updateDiscountDetails(itemId, discount), HttpStatus.OK);
     }
 
 }

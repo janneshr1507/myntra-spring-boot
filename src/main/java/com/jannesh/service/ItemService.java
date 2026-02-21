@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -42,7 +43,9 @@ public class ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
     }
 
-    public boolean existsByItemId(UUID itemId) {
-        return itemRepo.existsById(itemId);
+    public ItemDTO updateDiscountDetails(UUID itemId, BigDecimal discount) {
+        Item item = fetchItemByItemId(itemId);
+        item.setDiscount(discount);
+        return mapper.toDTO(itemRepo.save(item));
     }
 }

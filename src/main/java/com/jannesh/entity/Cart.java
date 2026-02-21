@@ -1,5 +1,6 @@
 package com.jannesh.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jannesh.util.enums.CartStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,7 +28,7 @@ public class Cart {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CartStatus status;
+    private CartStatus cartStatus;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -38,7 +39,7 @@ public class Cart {
     @PrePersist
     public void onCreate() {
         this.cartId = UUID.randomUUID();
-        this.status = CartStatus.OPEN;
+        this.cartStatus = CartStatus.OPEN;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -48,6 +49,7 @@ public class Cart {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnore
     public List<CartItem> cartItemList = new ArrayList<>();
 }

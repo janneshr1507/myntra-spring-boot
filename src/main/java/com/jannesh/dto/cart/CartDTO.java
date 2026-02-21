@@ -14,14 +14,14 @@ import java.util.UUID;
 
 @Getter @Setter
 @ToString
-@JsonPropertyOrder({"cartId","customerId","totalMRP","totalDiscount","totalAmount","status","cartItemList","createdAt","updatedAt"})
+@JsonPropertyOrder({"cartId","customerId","totalMRP","totalDiscount","totalAmount","cartStatus","cartItemList","createdAt","updatedAt"})
 public class CartDTO {
     private UUID cartId;
     private UUID customerId;
     private BigDecimal totalMRP;
     private BigDecimal totalDiscount;
     private BigDecimal totalAmount;
-    private CartStatus status;
+    private CartStatus cartStatus;
     private List<CartItemDTO> cartItemList;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;

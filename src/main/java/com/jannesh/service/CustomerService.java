@@ -28,6 +28,11 @@ public class CustomerService {
                 .orElseThrow(() -> new EntityNotFoundException("Customer Not Found"));
     }
 
+    public CustomerDTO fetchCustomerDTOByCustomerId(UUID customerId) {
+        Customer customer = fetchCustomerByCustomerId(customerId);
+        return mapper.toDTO(customer);
+    }
+
     public boolean existsByCustomerId(UUID customerId) {
         return customerRepo.existsByCustomerIdAndCustomerStatus(customerId, CustomerStatus.ACTIVE);
     }

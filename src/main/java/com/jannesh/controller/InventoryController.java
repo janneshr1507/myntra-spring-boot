@@ -22,7 +22,7 @@ public class InventoryController {
     }
 
     @GetMapping("/get/{itemId}")
-    public ResponseEntity<?> getInventoryDTOByItemId(@PathVariable("itemId") UUID itemId) {
+    public ResponseEntity<?> getInventoryByItemId(@PathVariable("itemId") UUID itemId) {
         return new ResponseEntity<>(inventoryService.fetchInventoryDTOByItemId(itemId), HttpStatus.OK);
     }
 }

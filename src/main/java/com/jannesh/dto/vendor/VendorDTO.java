@@ -1,11 +1,14 @@
 package com.jannesh.dto.vendor;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.jannesh.dto.warehouse.WarehouseDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter @Setter
@@ -14,6 +17,7 @@ import java.util.UUID;
 public class VendorDTO {
     private UUID vendorId;
     private String name;
+    private List<WarehouseDTO> warehouses;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -39,4 +41,7 @@ public class Vendor {
     private void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "vendor", cascade =  CascadeType.ALL, orphanRemoval = true)
+    private List<Warehouse> warehouses = new ArrayList<>();
 }

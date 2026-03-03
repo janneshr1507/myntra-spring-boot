@@ -4,16 +4,20 @@ import com.jannesh.dto.vendor.SaveVendorDTO;
 import com.jannesh.dto.vendor.VendorDTO;
 import com.jannesh.service.VendorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/vendor")
 @RequiredArgsConstructor
 public class VendorController {
     private final VendorService vendorService;
+
+    @GetMapping("/get/{vendorId}")
+    public VendorDTO getVendorDetails(@PathVariable("vendorId") UUID vendorId) {
+        return vendorService.fetchVendorDetails(vendorId);
+    }
 
     @PostMapping("/save")
     public VendorDTO saveVendor(@RequestBody SaveVendorDTO requestDTO) {

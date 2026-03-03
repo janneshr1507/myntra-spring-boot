@@ -6,6 +6,7 @@ import com.jannesh.entity.Vendor;
 import com.jannesh.repository.VendorRepository;
 import com.jannesh.util.mapper.VendorMapper;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,13 @@ import java.util.UUID;
 public class VendorService {
     private final VendorRepository vendorRepo;
     private final VendorMapper mapper;
+
+    @Transactional
+    public VendorDTO fetchVendorDetails(UUID vendorId) {
+        Vendor vendor = vendorRepo.findById(vendorId)
+                .orElseThrow(()->new EntityNotFoundException("Vendor Not Found"));
+        return mapper.toDTO(vendor);
+    }
 
     public Vendor fetchVendorByVendorId(UUID inventoryId) {
         return vendorRepo.findById(inventoryId)

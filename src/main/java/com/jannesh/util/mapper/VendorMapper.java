@@ -5,7 +5,7 @@ import com.jannesh.dto.vendor.VendorDTO;
 import com.jannesh.entity.Vendor;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {WarehouseMapper.class})
 public interface VendorMapper {
     VendorDTO toDTO(Vendor vendor);
     Vendor toEntity(SaveVendorDTO vendorDTO);

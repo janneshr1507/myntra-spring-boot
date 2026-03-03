@@ -8,12 +8,18 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table (
+        name = "vendor",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_vendor_name", columnNames = "name")
+        }
+)
 @Getter @Setter
 public class Vendor {
     @Id
     private UUID vendorId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, updatable = false)

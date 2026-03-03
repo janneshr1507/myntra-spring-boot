@@ -7,7 +7,7 @@ import com.jannesh.repository.VendorRepository;
 import com.jannesh.util.mapper.VendorMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
@@ -24,15 +24,27 @@ public class VendorService {
     }
 
     public VendorDTO createVendorDTO(SaveVendorDTO requestDTO) {
-        Vendor vendor = mapper.toEntity(requestDTO);
-        return mapper.toDTO(createVendor(vendor));
-    }
-
-    public Vendor createVendor(Vendor vendor) {
         try {
-            return vendorRepo.save(vendor);
+            Vendor vendor = mapper.toEntity(requestDTO);
+            return mapper.toDTO(vendorRepo.save(vendor));
         } catch (DataIntegrityViolationException ex) {
-            throw new RuntimeException("Vendor with that name already exists");
+            throw handleDataIntegrityViolation(ex);
         }
     }
+
+    private RuntimeException handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            if (cause instanceof ConstraintViolationException constraintEx) {
+                String constraintName = constraintEx.getConstraintName();
+                if("SYSTEM.UK_VENDOR_NAME".equalsIgnoreCase(constraintName)) {
+                    throw new RuntimeException("Vendor Already Exists");
+                }
+            }
+            cause = cause.getCause();
+        }
+
+        return ex;
+    }
+
 }

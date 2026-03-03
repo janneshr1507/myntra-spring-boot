@@ -4,11 +4,14 @@ import com.jannesh.dto.warehouse.SaveWarehouseDTO;
 import com.jannesh.dto.warehouse.WarehouseDTO;
 import com.jannesh.entity.Vendor;
 import com.jannesh.entity.Warehouse;
+import com.jannesh.repository.VendorRepository;
 import com.jannesh.repository.WarehouseRepository;
 import com.jannesh.util.mapper.WarehouseMapper;
 import com.jannesh.util.enums.WarehouseStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ import java.util.UUID;
 public class WarehouseService {
     private final WarehouseRepository warehouseRepo;
     private final VendorService vendorService;
+    private final VendorRepository vendorRepo;
     private final WarehouseMapper mapper;
 
     public Warehouse fetchWarehouseByWarehouseIdAndVendorId(UUID warehouseId, UUID vendorId) {
@@ -38,14 +42,38 @@ public class WarehouseService {
     }
 
     public WarehouseDTO createWarehouseDTO(SaveWarehouseDTO requestDTO) {
-        if(warehouseRepo.existsByVendor_VendorIdAndPincode(requestDTO.getVendorId(), requestDTO.getPincode()))
-            throw new RuntimeException("Warehouse already exists on that pincode");
+        try {
+            Vendor vendor = vendorRepo.findById(requestDTO.getVendorId())
+                    .orElseThrow(() -> new EntityNotFoundException("Vendor Not Found"));
 
-        Vendor vendor = vendorService.fetchVendorByVendorId(requestDTO.getVendorId());
-        Warehouse warehouse = mapper.toEntity(requestDTO);
-        warehouse.setVendor(vendor);
+            Warehouse warehouse = mapper.toEntity(requestDTO);
+            warehouse.setVendor(vendor);
+            return mapper.toDTO(createWarehouse(warehouse));
 
-        return mapper.toDTO(createWarehouse(warehouse));
+        } catch (DataIntegrityViolationException ex) {
+            throw handleDataIntegrityViolation(ex);
+        }
+    }
+
+    private RuntimeException handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            if (cause instanceof ConstraintViolationException constraintEx) {
+                String constraintName = constraintEx.getConstraintName();
+                if("SYSTEM.UK_WAREHOUSE_NAME".equalsIgnoreCase(constraintName)) {
+                    throw new RuntimeException("Warehouse Already Exists");
+                } else if("SYSTEM.UK_WAREHOUSE_CONTACT".equalsIgnoreCase(constraintName)) {
+                    throw new RuntimeException("Warehouse Contact Already Exists");
+                } else if ("SYSTEM.UK_WAREHOUSE_EMAIL".equalsIgnoreCase(constraintName)) {
+                    throw new RuntimeException("Warehouse Email Already Exists");
+                } else if("SYSTEM.UK_WAREHOUSE_VENDOR_PINCODE".equalsIgnoreCase(constraintName)) {
+                    throw new RuntimeException("Warehouse Vendor-Pincode Already Exists");
+                }
+            }
+            cause = cause.getCause();
+        }
+
+        return ex;
     }
 
     public Warehouse createWarehouse(Warehouse warehouse) {

@@ -9,6 +9,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(
+        name = "warehouse",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_warehouse_name", columnNames = "name"),
+                @UniqueConstraint(name = "uk_warehouse_contact", columnNames = "contact"),
+                @UniqueConstraint(name = "uk_warehouse_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_warehouse_vendor_pincode", columnNames = {"vendor_id", "pincode"})
+        }
+)
 @Getter @Setter
 public class Warehouse {
 
